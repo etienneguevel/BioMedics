@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Union
 
 import pandas as pd
+import typer
 from omegaconf.dictconfig import DictConfig
 from omegaconf.listconfig import ListConfig
 
@@ -15,10 +16,10 @@ from biomedics.normalization.coder_inference.text_preprocessor import TextPrepro
 os.environ["OMP_NUM_THREADS"] = "16"
 
 def coder_wrapper(
-        df: pd.DataFrame,
-        config: Union[DictConfig, ListConfig],
-        model_path: Union[str, Path]
-    ):
+    df: pd.DataFrame,
+    config: Union[DictConfig, ListConfig],
+    model_path: Union[str, Path]
+):
     # This wrapper is needed to preprocess terms
     # and in case the cells contains list of terms instead of one unique term
     df = df.reset_index(drop=True)
@@ -119,3 +120,22 @@ def coder_wrapper(
         .reset_index(drop=True)
     )
     return df
+
+def main(
+    df: pd.DataFrame,
+    config: Union[DictConfig, ListConfig],
+):
+    if config.column_name_to_normalize not in df.columns:
+        replacement_col = (
+            "terms_linked_to_measurement"
+            if "terms_linked_to_measurement" in df.columns
+            else "term"
+        )
+        df = df.explode(replacement_col)
+        df[config.column_name_to_normalize] = df[replacement_col]
+
+    df = coder_wrapper(df, config, config.model_path)
+    return df
+
+if __name__ == "__main__":
+    typer.run(main)

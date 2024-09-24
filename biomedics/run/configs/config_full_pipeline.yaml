@@ -15,7 +15,7 @@ normalization:
     synonyms_column_name: STR
     label_to_normalize: BIO
     qualifiers: []
-    column_name_to_normalize: lexical_variant_bio
+    column_name_to_normalize: lexical_variant
     coder_device: cuda:0
     coder_save_umls_embeddings_dir: false
     coder_save_umls_des_dir: false

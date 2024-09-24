@@ -3,7 +3,7 @@ from omegaconf import OmegaConf
 
 from biomedics.extract_measurement.main import main as extract_measurements
 from biomedics.ner.extract import main as extract_ents
-from biomedics.normalization.coder_inference.main import coder_wrapper
+from biomedics.normalization.coder_inference.main import main as coder_inference
 from biomedics.normalization.fuzzy.main import main as fuzzy_normalize
 
 
@@ -18,10 +18,9 @@ def main(config_path: str):
     df_ents = extract_measurements(config.measurements, config.data.raw_output)
 
     # Normalize the BIOmeasurements
-    df_ents = coder_wrapper(
+    df_ents = coder_inference(
         df_ents,
         config.normalization.BIO,
-        config.normalization.BIO.model_path
     )
 
     #Normalize the chemical_and_drugs measurements

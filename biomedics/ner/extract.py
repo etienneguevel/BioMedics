@@ -1,4 +1,5 @@
 import os
+import sys
 from typing import List, Optional, Union
 
 import edsnlp
@@ -115,8 +116,7 @@ def main(
         print("Using EDS-Biomedic")
         nlp = eds_biomedic()
     except ImportError:
-        print("EDS-Biomedic not found, using default model")
-        nlp = edsnlp.blank("fr")
+        sys.exit("EDS-Biomedic not found, please define the way to load the model.")
 
     docs = build_data(root)
     basic_attributes = [

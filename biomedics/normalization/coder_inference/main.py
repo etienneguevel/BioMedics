@@ -7,8 +7,10 @@ import pandas as pd
 from omegaconf.dictconfig import DictConfig
 from omegaconf.listconfig import ListConfig
 
-from .get_normalization_with_coder import CoderNormalizer
-from .text_preprocessor import TextPreprocessor
+from biomedics.normalization.coder_inference.get_normalization_with_coder import (
+    CoderNormalizer,
+)
+from biomedics.normalization.coder_inference.text_preprocessor import TextPreprocessor
 
 os.environ["OMP_NUM_THREADS"] = "16"
 
@@ -40,7 +42,7 @@ def coder_wrapper(
         umls_df = umls_df.explode(config.synonyms_column_name)
     else:
         raise ValueError("umls_path should be a json or pkl file.")
-    
+
     umls_df[config.synonyms_column_name] = umls_df[config.synonyms_column_name].apply(
         lambda term: text_preprocessor(
             text=term,

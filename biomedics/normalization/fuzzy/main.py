@@ -5,7 +5,9 @@ from typing import Union
 import duckdb
 import edsnlp
 import pandas as pd
+import typer
 from edsnlp.connectors import BratConnector
+from omegaconf import OmegaConf
 from unidecode import unidecode
 
 from .exception import exception_list
@@ -14,20 +16,22 @@ from .exception import exception_list
 class FuzzyNormalizer:
     def __init__(
         self,
-        df_path: Union[str, Path],
+        data: Union[str, Path, pd.DataFrame],
         drug_dict: Union[dict, pd.DataFrame],
         label_to_normalize: str,
         with_qualifiers,
         atc_len=7
     ):
-        if str(df_path).endswith("json"):
-            self.df = pd.read_json(df_path)
-            if "term_to_norm" not in self.df.columns:
-                self.df["term_to_norm"] = self.df.term.str.lower().str.strip()
+        if isinstance(data, pd.DataFrame):
+            self.df = data
+        elif str(data).endswith("json"):
+            self.df = pd.read_json(data)
         else:
             self.df = self._gold_generation(
-                df_path, label_to_normalize, with_qualifiers
+                data, label_to_normalize, with_qualifiers
             )
+        if "term_to_norm" not in self.df.columns:
+            self.df["term_to_norm"] = self.df.term.str.lower().str.strip()
 
         self.unashable_cols = []
         for col in self.df.columns:
@@ -150,10 +154,10 @@ class FuzzyNormalizer:
                 "select *, jaro_winkler_similarity(df.term_to_norm, df_2.norm_term) score " \
                 f"from df, df_2 where score > {threshold}"
             ).to_df()
-            
+
             merged_df["span_converted"] = merged_df["span_converted"].apply(tuple)
             merged_df["Negation"] = merged_df["Negation"].apply(lambda x: x=="True")
-            
+
             idx = (
                 merged_df.groupby(["source", "span_converted"])[
                     "score"
@@ -177,3 +181,23 @@ class FuzzyNormalizer:
             df[col] = df[col].apply(lambda x: eval(x))
         return df
 
+def main(
+        data: Union[str, Path, pd.DataFrame],
+        config_path: str
+):
+    print(f"Extracting med entities from {data}")
+    config = OmegaConf.load(config_path)
+    drug_dict = pd.read_pickle(config.drug_dict_path)
+    normalizer = FuzzyNormalizer(
+        data,
+        drug_dict,
+        config.label_to_normalize,
+        config.with_qualifiers,
+        atc_len=7,
+    )
+    df = normalizer.normalize(method=config.method, threshold=config.threshold)
+    return df
+
+
+if __name__ == "__main__":
+    typer.run(main)

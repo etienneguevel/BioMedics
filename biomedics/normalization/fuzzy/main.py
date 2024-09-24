@@ -7,7 +7,6 @@ import edsnlp
 import pandas as pd
 import typer
 from edsnlp.connectors import BratConnector
-from omegaconf import OmegaConf
 from omegaconf.dictconfig import DictConfig
 from omegaconf.listconfig import ListConfig
 from unidecode import unidecode
@@ -105,7 +104,7 @@ class FuzzyNormalizer:
 
         df = pd.DataFrame(
             ents_list, columns=df_columns
-        ).
+        )
         return df
 
     def normalize(self, method: str = "lev", threshold: Union[int, float] = 10):

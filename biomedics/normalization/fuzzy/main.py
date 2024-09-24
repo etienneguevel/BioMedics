@@ -25,6 +25,7 @@ class FuzzyNormalizer:
     ):
         if isinstance(data, pd.DataFrame):
             self.df = data
+            data["span"] = data.apply(lambda x: (x["start"], x["end"]), axis=1)
         elif str(data).endswith("json"):
             self.df = pd.read_json(data)
         else:

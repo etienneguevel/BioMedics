@@ -70,7 +70,7 @@ class CoderNormalizer:
                     else:
                         embed = torch.mean(self.model.bert(input_gpu_0)[0], dim=1)
                 if normalize:
-                    embed_norm = torch.norm(embed, p=2, dim=1, keepdim=True).clamp(
+                    embed_norm = torch.norm(embed, p="2", dim=1, keepdim=True).clamp(
                         min=1e-12
                     )
                     embed = embed / embed_norm
@@ -109,8 +109,8 @@ class CoderNormalizer:
         umls_labels_list,
         umls_des_list,
         data_list,
-        save_umls_embeddings_dir=False,
-        save_data_embeddings_dir=False,
+        save_umls_embeddings_dir=None,
+        save_data_embeddings_dir=None,
         normalize=True,
         summary_method="CLS",
         tqdm_bar=False,

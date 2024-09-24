@@ -99,13 +99,13 @@ class FuzzyNormalizer:
                         for qualifier in qualifiers:
                             ent_data.append(getattr(ent._, qualifier))
                         ents_list.append(ent_data)
-        df_columns = ["term", "source", "span_converted", "term_to_norm"]
+        df_columns = ["term", "source", "span", "term_to_norm"]
         if with_qualifiers:
             df_columns += qualifiers
 
         df = pd.DataFrame(
             ents_list, columns=df_columns
-        )
+        ).
         return df
 
     def normalize(self, method: str = "lev", threshold: Union[int, float] = 10):
@@ -141,7 +141,7 @@ class FuzzyNormalizer:
                 ]
             )
             idx = (
-                merged_df.groupby(["source", "span_converted"])[
+                merged_df.groupby(["source", "span"])[
                     "score"
                 ].transform(max)
                 == merged_df["score"]
@@ -157,11 +157,11 @@ class FuzzyNormalizer:
                 f"from df, df_2 where score > {threshold}"
             ).to_df()
 
-            merged_df["span_converted"] = merged_df["span_converted"].apply(tuple)
+            merged_df["span"] = merged_df["span"].apply(tuple)
             merged_df["Negation"] = merged_df["Negation"].apply(lambda x: x=="True")
 
             idx = (
-                merged_df.groupby(["source", "span_converted"])[
+                merged_df.groupby(["source", "span"])[
                     "score"
                 ].transform(max)
                 == merged_df["score"]

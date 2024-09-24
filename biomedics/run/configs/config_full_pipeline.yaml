@@ -78,5 +78,5 @@ normalization:
     drug_dict_path: /export/home/cse200055/Etienne/BioMedics/data/drug_knowledge/final_dict.pkl
     label_to_normalize: Chemical_and_drugs
     with_qualifiers: True
-    method: lev
-    threshold: 10
+    method: jaro_winkler
+    threshold: 0.8

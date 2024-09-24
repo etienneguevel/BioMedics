@@ -8,6 +8,8 @@ import pandas as pd
 import typer
 from edsnlp.connectors import BratConnector
 from omegaconf import OmegaConf
+from omegaconf.dictconfig import DictConfig
+from omegaconf.listconfig import ListConfig
 from unidecode import unidecode
 
 from .exception import exception_list
@@ -183,10 +185,9 @@ class FuzzyNormalizer:
 
 def main(
         data: Union[str, Path, pd.DataFrame],
-        config_path: str
+        config: Union[DictConfig, ListConfig]
 ):
     print(f"Extracting med entities from {data}")
-    config = OmegaConf.load(config_path)
     drug_dict = pd.read_pickle(config.drug_dict_path)
     normalizer = FuzzyNormalizer(
         data,

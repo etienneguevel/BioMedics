@@ -17,8 +17,11 @@ echo "Python used: $(which python)"
 
 start_time=$(date +%s)
 
+
+
 echo "----------Starting the full pipeline----------"
-python biomedics/run/full_pipeline.py --config_path biomedics/run/configs/config_full_pipeline.yaml
+config_path="biomedics/run/configs/config_full_pipeline.yaml"
+python biomedics/run/full_pipeline.py $config_path
 end_time=$(date +%s)
 echo "----------Full pipeline done----------"
 

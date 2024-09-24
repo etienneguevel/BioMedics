@@ -135,7 +135,7 @@ def main(
     )
     if output_path:
         df_ents.to_parquet(
-            output_path + ".parquet",
+            output_path,
             engine="pyarrow",
             compression="snappy"
         )

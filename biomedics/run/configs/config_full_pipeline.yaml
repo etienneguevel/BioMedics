@@ -75,7 +75,7 @@ normalization:
     coder_remove_special_characters_umls: true
   
   chemical_and_drugs:
-    drug_dict: /export/home/cse200055/Etienne/BioMedics/data/drug_dict/drug_dict_atc_7.pkl
+    drug_dict_path: /export/home/cse200055/Etienne/BioMedics/data/drug_dict/drug_dict_atc_7.pkl
     label_to_normalize: Chemical_and_drugs
     with_qualifiers: True
     method: lev

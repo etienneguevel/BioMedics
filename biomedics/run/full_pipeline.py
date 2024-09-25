@@ -15,9 +15,13 @@ def main(config_path: str):
     extract_ents(config.data.root, config.data.raw_output)
 
     # Extract measurements
-    df_ents = extract_measurements(config.measurements, config.data.raw_output)
+    df_ents = extract_measurements(
+        config.measurements,
+        config.data.raw_output,
+        config.attributes,
+    )
 
-    # Normalize the BIOmeasurements
+    # Normalize the BIO measurements
     df_ents = coder_inference(
         df_ents,
         config.normalization.BIO,

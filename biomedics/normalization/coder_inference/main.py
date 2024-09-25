@@ -18,7 +18,7 @@ os.environ["OMP_NUM_THREADS"] = "16"
 def coder_wrapper(
     df: pd.DataFrame,
     config: Union[DictConfig, ListConfig],
-    model_path: Union[str, Path]
+    model_path: Union[str, Path],
 ):
     # This wrapper is needed to preprocess terms
     # and in case the cells contains list of terms instead of one unique term

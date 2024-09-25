@@ -59,7 +59,15 @@ def load_data(data_path: str) -> pd.DataFrame:
     ]]
 
 
-def main(script_config: Dict[str, Any], data_path: str, output_dir: Optional[str]=None):
+def main(
+    script_config: Dict[str, Any],
+    data_path: str,
+    output_dir: Optional[str]=None,
+    attributes: Optional[List[str]]=None
+):
+    if attributes is None:
+        attributes = []
+
     logger.info('-------------Load entities-------------')
 
     start_t1 = time.time()
@@ -181,7 +189,7 @@ def main(script_config: Dict[str, Any], data_path: str, output_dir: Optional[str
             'value_cleaned',
             'extracted_date',
             # 'fluid_source',
-        ]
+        ] + attributes
     ]
 
     if output_dir:
@@ -199,7 +207,7 @@ def main(script_config: Dict[str, Any], data_path: str, output_dir: Optional[str
     # Merge with the original dataframe, keep the lexical variant filtered.
 
     df_final = df_final[
-        ["source", "span_start", "span_end", "lexical_variant", "value_cleaned", "range_value", "unit"]
+        ["source", "span_start", "span_end", "lexical_variant", "value_cleaned", "range_value", "unit"] + attributes
     ].merge(df[[c for c in df.columns if c != "lexical_variant"]], on=("source", "span_start", "span_end"))
 
     df_out = pd.concat([

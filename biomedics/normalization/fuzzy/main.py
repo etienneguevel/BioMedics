@@ -194,9 +194,11 @@ def main(
         drug_dict,
         config.label_to_normalize,
         config.with_qualifiers,
-        atc_len=7,
+        atc_len=12,
     )
     df = normalizer.normalize(method=config.method, threshold=config.threshold)
+    df = df.explode(["label"])
+    df = df.rename(columns={"label_1": "normalized_label"})
     return df
 
 

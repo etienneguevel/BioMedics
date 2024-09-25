@@ -109,6 +109,8 @@ def coder_wrapper(
     exploded_term_df[
         ["label", "norm_term", "score"]
     ] = pd.DataFrame(zip(*coder_res))
+    exploded_term_df = exploded_term_df.rename(columns={"label": "normalized_label"},)
+    
     df = (
         pd.merge(
             df.drop(columns=[config.column_name_to_normalize]),
@@ -135,6 +137,7 @@ def main(
         df[config.column_name_to_normalize] = df[replacement_col]
 
     df = coder_wrapper(df, config, config.model_path)
+    df = df.explode(["normalized_label"])
     return df
 
 if __name__ == "__main__":

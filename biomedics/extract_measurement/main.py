@@ -49,14 +49,7 @@ def load_data(data_path: str) -> pd.DataFrame:
         raise ValueError(f"Invalid data path: {data_path}")
 
 
-    return df[[
-        "term",
-        "lexical_variant",
-        "source",
-        "span_start",
-        "span_end",
-        "label"
-    ]]
+    return df
 
 
 def main(
@@ -207,12 +200,13 @@ def main(
     # Merge with the original dataframe, keep the lexical variant filtered.
 
     df_final = df_final[
-        ["source", "span_start", "span_end", "lexical_variant", "value_cleaned", "range_value", "unit"] + attributes
+        ["source", "span_start", "span_end", "lexical_variant", "value_cleaned", "range_value", "unit"]
     ].merge(df[[c for c in df.columns if c != "lexical_variant"]], on=("source", "span_start", "span_end"))
 
     df_out = pd.concat([
         df_final,
         df[~(df["label"].isin(all_labels))]
     ], axis=0)
+    df_out["value_cleaned"] = df_out["value_cleaned"].astype(str)
 
     return df_out

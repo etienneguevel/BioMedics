@@ -1,8 +1,8 @@
 data:
   root: "/export/home/cse200055/brat_data/Etienne/ai_triomph/EDS-biomedic/CONS"
   raw_output: "/export/home/cse200055/Etienne/ai_triomph/data/extracted/CONS_ents.parquet"
-  output: "/export/home/cse200055/Etienne/ai_triomph/data/processed/CONS_ents.parquet"
-  format: parquet
+  output: "/export/home/cse200055/brat_data/Etienne/ai_triomph/EDS-biomedic/TEST"
+  format: brat
 
 measurements:
   label_key: "BIO_comp"

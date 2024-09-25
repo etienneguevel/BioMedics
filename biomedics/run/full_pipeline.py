@@ -145,6 +145,7 @@ def main(config_path: str):
         df_bio = clean_bio_df(df_bio)
         df_drug = clean_drug_df(df_drug)
         df_ents = pd.concat([df_bio, df_drug], axis=0)
+        df_ents = df_ents.explode(["norm_term"])
 
         # Load the texts
         texts = load_texts(config.data.root)

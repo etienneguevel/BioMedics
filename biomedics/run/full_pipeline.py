@@ -83,7 +83,7 @@ def make_ann_file(df_ents, note_id, attr=None):
     e = 1
 
     for i, ent in df_ents[df_ents.source == note_id].iterrows():
-        s += f"T{e}\t{ent['label']} {ent['span_start']} {ent['span_end']}\t{replace_newline(ent['norm_term'])}\n"
+        s += f"T{e}\t{ent['label']} {ent['span_start']} {ent['span_end']}\t{replace_newline(ent['lexical_variant'])}\n"
 
         for k in attr:
             if ent[k] is not None:
@@ -150,7 +150,11 @@ def main(config_path: str):
         # Load the texts
         texts = load_texts(config.data.root)
         for note_id, text in texts:
-            ann_file = make_ann_file(df_ents, note_id, attr=config.attributes)
+            ann_file = make_ann_file(
+                df_ents,
+                note_id,
+                attr=config.attributes + ["value_cleaned", "unit", "norm_term"]
+            )
             with open(os.path.join(config.data.output, f"{note_id}.ann"), "w") as f:
                 f.write(ann_file)
             with open(os.path.join(config.data.output, f"{note_id}.txt"), "w") as f:

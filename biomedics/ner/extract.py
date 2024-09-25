@@ -18,8 +18,8 @@ def convert_doc_to_dict(doc: Doc, attributes: Optional[List[str]] = None) -> Lis
             "note_id": doc._.note_id,
             "lexical_variant": e.text,
             "label": e.label_,
-            "start": e.start,
-            "end": e.end,
+            "start": e.start_char,
+            "end": e.end_char,
         }, **{
             attr: getattr(e._, attr) for attr in attributes
         }}
@@ -31,8 +31,8 @@ def convert_doc_to_dict(doc: Doc, attributes: Optional[List[str]] = None) -> Lis
                 "note_id": doc._.note_id,
                 "lexical_variant": s.text,
                 "label": "BIO",
-                "start": s.start,
-                "end": s.end,
+                "start": s.start_char,
+                "end": s.end_char,
             }, **{
                 attr: getattr(s._, attr) for attr in attributes
             }}

@@ -22,6 +22,7 @@ def main(config_path: str):
         df_ents,
         config.normalization.BIO,
     )
+    print(df_ents.columns)
 
     #Normalize the chemical_and_drugs measurements
     df_ents = fuzzy_normalize(

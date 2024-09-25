@@ -3,7 +3,7 @@
 #SBATCH -t 48:00:00
 #SBATCH --gres=gpu:v100:1
 #SBATCH --cpus-per-task=2
-#SBATCH --mem=20000
+#SBATCH --mem=100000
 #SBATCH --partition gpuV100
 #SBATCH --output=/export/home/cse200055/Etienne/ai_triomph/log/slurm-%x-%j-stdout.log
 #SBATCH --error=/export/home/cse200055/Etienne/ai_triomph/log/slurm-%x-%j-stderr.log

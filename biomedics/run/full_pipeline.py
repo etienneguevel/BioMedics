@@ -95,7 +95,11 @@ def make_ann_file(df_ents, note_id, attr=None):
 
 def main(config_path: str):
     # Read the config file
-    config = OmegaConf.load(config_path)
+    try:
+        config = OmegaConf.load(config_path)
+    except Exception as e:
+        print(f"Error loading config file: {e}")
+        raise typer.Exit(code=1)
 
     # Extract entities from the texts
     extract_ents(config.data.root, config.data.raw_output)
@@ -124,14 +128,20 @@ def main(config_path: str):
         config.normalization.chemical_and_drugs,
     )
 
+    df_bio = df_bio.explode(["norm_term"])
+    df_drug = df_drug.explode(["norm_term"])
+    df_other = df_other.explode(["norm_term"])
+
+    # Clean the data
+    df_bio = clean_bio_df(df_bio)
+    df_drug = clean_drug_df(df_drug)
+
     # Concatenate the different entities
     df_ents = pd.concat([
         df_bio,
         df_drug,
         df_other
     ], axis=0)
-
-    df_ents = df_ents.explode(["norm_term"])
 
     # Save the processed data
     if config.data.format == "parquet":
@@ -142,10 +152,7 @@ def main(config_path: str):
             os.makedirs(config.data.output)
 
         # Clean the data
-        df_bio = clean_bio_df(df_bio)
-        df_drug = clean_drug_df(df_drug)
         df_ents = pd.concat([df_bio, df_drug], axis=0)
-        df_ents = df_ents.explode(["norm_term"])
 
         # Load the texts
         texts = load_texts(config.data.root)
@@ -160,7 +167,6 @@ def main(config_path: str):
             with open(os.path.join(config.data.output, f"{note_id}.txt"), "w") as f:
                 f.write(text)
 
-        pass
     else:
         raise ValueError("The format indicated is not recognized.")
 

@@ -130,7 +130,6 @@ def main(config_path: str):
 
     df_bio = df_bio.explode(["norm_term"])
     df_drug = df_drug.explode(["norm_term"])
-    df_other = df_other.explode(["norm_term"])
 
     # Clean the data
     df_bio = clean_bio_df(df_bio)

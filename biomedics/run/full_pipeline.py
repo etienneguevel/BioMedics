@@ -112,9 +112,8 @@ def main(config_path: str, output_path: Optional[str] = None):
     )
     df_bio = df_ents[df_ents.label == "BIO_comp"]
     df_drug = df_ents[df_ents.label == "Chemical_and_drugs"]
-    df_other = df_ents[~(df_ents.label.isin(["BIO_comp", "Chemical_and_drugs"]))]
+    # df_other = df_ents[~(df_ents.label.isin(["BIO_comp", "Chemical_and_drugs"]))]
 
-    del df_ents
     # Normalize the BIO measurements
     df_bio = coder_inference(
         df_bio,
@@ -139,7 +138,6 @@ def main(config_path: str, output_path: Optional[str] = None):
     df_ents = pd.concat([
         df_bio,
         df_drug,
-        df_other
     ], axis=0)
     df_ents = df_ents.rename(columns={"value_cleaned": "value"})
 

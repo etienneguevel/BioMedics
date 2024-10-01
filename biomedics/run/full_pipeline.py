@@ -1,5 +1,5 @@
 import os
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import pandas as pd
 import typer
@@ -33,7 +33,7 @@ def clean_bio_df(df: pd.DataFrame) -> pd.DataFrame:
         "neutrophile_count": "C0200633",
     }
     df_bio_dict = pd.DataFrame(
-        [[k, v] for k, v in ai_bio_dict.items()], columns=["norm_term", "normalized_label"]
+        [[k, v] for k, v in ai_bio_dict.items()], columns=["norm_term", "normalized_label"]  # noqa: E501
     ).explode(["normalized_label"])
 
     df = df.drop(columns=["norm_term"])
@@ -64,7 +64,7 @@ def load_texts(root: str) -> List[Tuple[str, str]]:
 
     elif root.endswith(".csv"):
         df = pd.read_csv(root)
-        texts = [(str(row["note_id"]), str(row["note_txt"])) for _, row in df.iterrows()]
+        texts = [(str(row["note_id"]), str(row["note_txt"])) for _, row in df.iterrows()]  # noqa: E501
 
     else:
         raise ValueError("The root must be a directory or a file.")
@@ -82,18 +82,18 @@ def make_ann_file(df_ents, note_id, attr=None):
     a = 1
     e = 1
 
-    for i, ent in df_ents[df_ents.source == note_id].iterrows():
-        s += f"T{e}\t{ent['label']} {ent['span_start']} {ent['span_end']}\t{replace_newline(ent['lexical_variant'])}\n"
+    for _, ent in df_ents[df_ents.source == note_id].iterrows():
+        s += f"T{e}\t{ent['label']} {ent['span_start']} {ent['span_end']}\t{replace_newline(ent['lexical_variant'])}\n"  # noqa: E501
 
         for k in attr:
-            if ent[k] is not None:
+            if ent.get(k) is not None:
                 s += f"A{a}\t{k} T{e} {ent.get(k)}\n"
                 a += 1
         e += 1
 
     return s
 
-def main(config_path: str):
+def main(config_path: str, output_path: Optional[str] = None):
     # Read the config file
     try:
         config = OmegaConf.load(config_path)
@@ -141,14 +141,23 @@ def main(config_path: str):
         df_drug,
         df_other
     ], axis=0)
+    df_ents = df_ents.rename(columns={"value_cleaned": "value"})
 
     # Save the processed data
-    if config.data.format == "parquet":
-        df_ents.to_parquet(config.data.output)
+    output_path = output_path or config.data.output
+    if output_path is None:
+        raise ValueError("The output path is required.")
 
-    elif config.data.format == "brat":
-        if not os.path.isdir(config.data.output):
-            os.makedirs(config.data.output)
+    if output_path.endswith(".parquet"):
+        df_ents.to_parquet(output_path)
+
+    else:
+        try:
+            if not os.path.isdir(output_path):
+                os.makedirs(output_path)
+        except Exception as e:
+            print(f"Error creating output directory: {e}")
+            raise typer.Exit(code=1)
 
         # Clean the data
         df_ents = pd.concat([df_bio, df_drug], axis=0)
@@ -159,15 +168,12 @@ def main(config_path: str):
             ann_file = make_ann_file(
                 df_ents,
                 note_id,
-                attr=config.attributes + ["value_cleaned", "unit", "norm_term"]
+                attr=config.attributes + ["value", "unit", "norm_term"]
             )
-            with open(os.path.join(config.data.output, f"{note_id}.ann"), "w") as f:
+            with open(os.path.join(output_path, f"{note_id}.ann"), "w") as f:
                 f.write(ann_file)
-            with open(os.path.join(config.data.output, f"{note_id}.txt"), "w") as f:
+            with open(os.path.join(output_path, f"{note_id}.txt"), "w") as f:
                 f.write(text)
-
-    else:
-        raise ValueError("The format indicated is not recognized.")
 
 if __name__ == "__main__":
     typer.run(main)

@@ -71,28 +71,6 @@ def load_texts(root: str) -> List[Tuple[str, str]]:
 
     return texts
 
-def make_ann_file(df_ents, note_id, attr=None):
-    if attr is None:
-        attr = []
-
-    def replace_newline(text):
-        return text.replace('\n', ' ')
-
-    s = ""
-    a = 1
-    e = 1
-
-    for _, ent in df_ents[df_ents.source == note_id].iterrows():
-        s += f"T{e}\t{ent['label']} {ent['span_start']} {ent['span_end']}\t{replace_newline(ent['lexical_variant'])}\n"  # noqa: E501
-
-        for k in attr:
-            if ent.get(k) is not None:
-                s += f"A{a}\t{k} T{e} {ent.get(k)}\n"
-                a += 1
-        e += 1
-
-    return s
-
 def main(config_path: str, output_path: Optional[str] = None):
     # Read the config file
     try:
@@ -100,6 +78,17 @@ def main(config_path: str, output_path: Optional[str] = None):
     except Exception as e:
         print(f"Error loading config file: {e}")
         raise typer.Exit(code=1)
+
+    # Check the output_path
+    output_path = output_path or config.data.output
+    if output_path is None:
+        raise ValueError("The output path is required.")
+
+    elif output_path.endswith(".parquet"):
+        pass
+
+    else:
+        output_path += ".parquet"
 
     # Extract entities from the texts
     extract_ents(config.data.root, config.data.raw_output)
@@ -142,36 +131,8 @@ def main(config_path: str, output_path: Optional[str] = None):
     df_ents = df_ents.rename(columns={"value_cleaned": "value"})
 
     # Save the processed data
-    output_path = output_path or config.data.output
-    if output_path is None:
-        raise ValueError("The output path is required.")
-
-    if output_path.endswith(".parquet"):
-        df_ents.to_parquet(output_path)
-
-    else:
-        try:
-            if not os.path.isdir(output_path):
-                os.makedirs(output_path)
-        except Exception as e:
-            print(f"Error creating output directory: {e}")
-            raise typer.Exit(code=1)
-
-        # Clean the data
-        df_ents = pd.concat([df_bio, df_drug], axis=0)
-
-        # Load the texts
-        texts = load_texts(config.data.root)
-        for note_id, text in texts:
-            ann_file = make_ann_file(
-                df_ents,
-                note_id,
-                attr=config.attributes + ["value", "unit", "norm_term"]
-            )
-            with open(os.path.join(output_path, f"{note_id}.ann"), "w") as f:
-                f.write(ann_file)
-            with open(os.path.join(output_path, f"{note_id}.txt"), "w") as f:
-                f.write(text)
+    print(f"Saving at {output_path}")
+    df_ents.to_parquet(output_path)
 
 if __name__ == "__main__":
     typer.run(main)

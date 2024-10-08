@@ -1,9 +1,10 @@
 import os
 import sys
-from typing import List, Optional, Union
+from typing import Any, List, Optional, Union
 
 import edsnlp
 import pandas as pd
+import pyarrow.parquet as pq
 import spacy
 import torch
 import typer
@@ -42,9 +43,7 @@ def convert_doc_to_dict(doc: Doc, attributes: Optional[List[str]] = None) -> Lis
         spans = []
     return ents + spans
 
-def build_data(
-    corpus: Union[str, pd.DataFrame],
-):
+def build_data(corpus: Union[str, pd.DataFrame], filter: Optional[Any] = None):
     """
     This function builds a data iterator from a text corpus.
     The data iterator can then be used to map a nlp model to the txts or for other
@@ -52,30 +51,41 @@ def build_data(
     Args:
         - corpus: either a directory with txts inside, a path to a .csv file that is in
     the form ["note_id", "note_txt"] or a pandas DataFrame with the same columns.
+        - filter: function taking a dataframe as en entry, supposed to filter the corpus
+        according to defined criterias.
     Returns:
         An iterator of spacy docs of the corpus.
     """
     if isinstance(corpus, str):
         if os.path.isdir(corpus):
             print(f"Building from dir {corpus}")
-            data = edsnlp.data.read_standoff(corpus) # type: ignore
+            data = edsnlp.data.read_standoff(corpus)  # type: ignore
 
-        elif corpus.endswith(".csv"):
-            print(f"Loading as a csv from {corpus}")
-            df = pd.read_csv(corpus)
-            data = edsnlp.data.from_pandas(df, converter="omop") # type: ignore
+        elif corpus.endswith((".csv", ".parquet")):
+            print(f"Loading from {corpus}.")
+            if corpus.endswith(".csv"):
+                df = pd.read_csv(corpus)
+            else:
+                df = pq.read_table(corpus).to_pandas(
+                    timestamp_as_object=True
+                )  # Pandas can fail to read parquet files sometimes
+            if filter:
+                df = filter(df)
+
+            data = edsnlp.data.from_pandas(df, converter="omop")  # type: ignore
 
         else:
-            raise ValueError("The corpus must be a directory or a csv file")
+            raise ValueError("The corpus must be a directory or a readable file.")
 
     elif isinstance(corpus, pd.DataFrame):
         print("Using corpus as a pandas DataFrame")
-        data = edsnlp.data.from_pandas(corpus, converter="omop") # type: ignore
+        data = edsnlp.data.from_pandas(corpus, converter="omop")  # type: ignore
 
     else:
         raise TypeError(f"Expected str of pd.DataFrame types, got {type(corpus)}")
 
     return data
+
 
 def extract_ents_from_docs(
     docs,

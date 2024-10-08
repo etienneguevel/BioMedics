@@ -40,6 +40,7 @@ def clean_bio_df(df: pd.DataFrame) -> pd.DataFrame:
     df = df.merge(df_bio_dict, on="normalized_label", how="inner")
     return df
 
+
 def clean_drug_df(df: pd.DataFrame) -> pd.DataFrame:
 
     cure_terms = ["folfirinox", "folfox", "folfiri", "xelox", "capox"]
@@ -49,27 +50,6 @@ def clean_drug_df(df: pd.DataFrame) -> pd.DataFrame:
     ]
     return df
 
-def load_texts(root: str) -> List[Tuple[str, str]]:
-    if os.path.isdir(root):
-        texts_path = [
-            os.path.join(root, f) for f in os.listdir(root) if f.endswith(".txt")
-        ]
-        texts = [
-            (
-                f.split("/")[-1].replace(".txt", ""),
-                open(f, "r").read()
-            )
-            for f in texts_path
-        ]
-
-    elif root.endswith(".csv"):
-        df = pd.read_csv(root)
-        texts = [(str(row["note_id"]), str(row["note_txt"])) for _, row in df.iterrows()]  # noqa: E501
-
-    else:
-        raise ValueError("The root must be a directory or a file.")
-
-    return texts
 
 def main(config_path: str, output_path: Optional[str] = None):
     # Read the config file
@@ -133,6 +113,7 @@ def main(config_path: str, output_path: Optional[str] = None):
     # Save the processed data
     print(f"Saving at {output_path}")
     df_ents.to_parquet(output_path)
+
 
 if __name__ == "__main__":
     typer.run(main)

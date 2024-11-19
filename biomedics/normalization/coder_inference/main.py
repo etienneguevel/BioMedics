@@ -19,7 +19,18 @@ def coder_wrapper(
     df: pd.DataFrame,
     config: Union[DictConfig, ListConfig],
     model_path: Union[str, Path],
-):
+) -> pd.DataFrame:
+    """
+    Function to normalize the biology entities. It uses the umls dictionnary and a model
+    to match the extracted text fields to umls concepts.
+    Args:
+        - df (pd.DataFrame): dataframe containing the entities to normalize
+        - config (Union[DictConfig, ListConfig]): config file
+        - model_path (Union[str, Path]): path toward the model to use for normalization.
+    Returns:
+    A pandas DataFrame containing the normalized entities.
+    """
+
     # This wrapper is needed to preprocess terms
     # and in case the cells contains list of terms instead of one unique term
     df = df.reset_index(drop=True)
@@ -38,9 +49,11 @@ def coder_wrapper(
     print("--- Preprocessing UMLS ---")
     if str(config.umls_path).endswith(".json"):
         umls_df = pd.read_json(config.umls_path)
+
     elif str(config.umls_path).endswith(".pkl"):
         umls_df = pd.read_pickle(config.umls_path)
         umls_df = umls_df.explode(config.synonyms_column_name)
+
     else:
         raise ValueError("umls_path should be a json or pkl file.")
 
@@ -110,7 +123,7 @@ def coder_wrapper(
         ["label", "norm_term", "score"]
     ] = pd.DataFrame(zip(*coder_res))
     exploded_term_df = exploded_term_df.rename(columns={"label": "normalized_label"},)
-    
+
     df = (
         pd.merge(
             df.drop(columns=[config.column_name_to_normalize]),
@@ -126,7 +139,7 @@ def coder_wrapper(
 def main(
     df: pd.DataFrame,
     config: Union[DictConfig, ListConfig],
-):
+) -> pd.DataFrame:
     if config.column_name_to_normalize not in df.columns:
         replacement_col = (
             "terms_linked_to_measurement"

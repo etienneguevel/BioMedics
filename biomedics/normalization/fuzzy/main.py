@@ -183,10 +183,23 @@ class FuzzyNormalizer:
             df[col] = df[col].apply(lambda x: eval(x))
         return df
 
+
 def main(
         data: Union[str, Path, pd.DataFrame],
         config: Union[DictConfig, ListConfig]
-):
+) -> pd.DataFrame:
+    """
+    Normalize medication entities in data according to patameters of the config file.
+    Fields of interest of the config files are the path to the drug_dict_path,
+    the name of the label to normalize, whether to use qualifiers; the method to use
+    and the threshold value.
+    Args:
+        - data (Union[str, Path, pd.DataFrame]) : path to the extracted ents
+        - config (Union[DictConfig, ListConfig]) : config to use
+
+    Returns:
+    A dataframe containing the normalized entities.
+    """
     print(f"Extracting med entities from {data}")
     drug_dict = pd.read_pickle(config.drug_dict_path)
     normalizer = FuzzyNormalizer(

@@ -213,14 +213,16 @@ def main(
     logger.info(f"Total processing time:  {round(final_time - start_t1,3)} secs")
 
     # Merge with the original dataframe, keep the lexical variant filtered.
-
     df_final = df_final[
         ["source", "span_start", "span_end", "lexical_variant", "value_cleaned", "range_value", "unit"]
-    ].merge(df[[c for c in df.columns if c != "lexical_variant"]], on=("source", "span_start", "span_end"))
+    ].merge(
+        df[[c for c in df.columns if c != "lexical_variant"]],
+        on=("source", "span_start", "span_end")
+    )
 
     df_out = pd.concat([
-        df_final,
-        df[~(df["label"].isin(all_labels))]
+        df_final.reset_index(drop=True),
+        df[~(df["label"].isin(all_labels))].reset_index(drop=True)
     ], axis=0)
     df_out["value_cleaned"] = df_out["value_cleaned"].astype(str)
 

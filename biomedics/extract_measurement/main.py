@@ -36,6 +36,7 @@ def load_data(data_path: str) -> pd.DataFrame:
 
     elif data_path.endswith(".csv"):
         df = pd.read_csv(data_path)
+
     elif data_path.endswith(".parquet"):
         df = pd.read_parquet(data_path)
         df = df.rename(columns={
@@ -57,7 +58,20 @@ def main(
     data_path: str,
     output_dir: Optional[str]=None,
     attributes: Optional[List[str]]=None
-):
+) -> pd.DataFrame:
+    """
+    Pipeline to apply measurement extraction to entities extracted
+    with the EDS-Biomedic model.
+    Args:
+        - script_config (Dict[str, Any]) : configuration setup to use
+        - data_path (str) : path to the ents, should be a .csv, .parquet or a dir_path
+        - output_dir (Optional[str]) : path to the directory where the extracted ents
+        will be saved
+        - attributes (Optional[List[str]]) : attributes to add to the extracted entities
+
+    Returns:
+    A dataframe with the BIO ents and their extracted measurements.
+    """
     if attributes is None:
         attributes = []
 
@@ -165,6 +179,7 @@ def main(
 
 
     logger.info('---------------Select columns of interest and convert to Pandas---------------')  # noqa: E501
+    attributes_found = [a for a in attributes if a in df_biocomp_bio_clean.columns]
     df_final = df_biocomp_bio_clean[
         [
             'source',
@@ -182,7 +197,7 @@ def main(
             'value_cleaned',
             'extracted_date',
             # 'fluid_source',
-        ] + attributes
+        ] + attributes_found
     ]
 
     if output_dir:

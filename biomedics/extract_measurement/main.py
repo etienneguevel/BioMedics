@@ -181,7 +181,7 @@ def main(
     logger.info('---------------Select columns of interest and convert to Pandas---------------')  # noqa: E501
     attributes_found = [a for a in attributes if a in df_biocomp_bio_clean.columns]
     df_final = df_biocomp_bio_clean[
-        [
+        set([
             'source',
             'span_start',
             'span_start_bio',
@@ -197,7 +197,7 @@ def main(
             'value_cleaned',
             'extracted_date',
             # 'fluid_source',
-        ] + attributes_found
+        ] + attributes_found)
     ]
 
     if output_dir:
@@ -221,8 +221,8 @@ def main(
     )
 
     df_out = pd.concat([
-        df_final.reset_index(drop=True),
-        df[~(df["label"].isin(all_labels))].reset_index(drop=True)
+        df_final,
+        df[~(df["label"].isin(all_labels))]
     ], axis=0)
     df_out["value_cleaned"] = df_out["value_cleaned"].astype(str)
 
